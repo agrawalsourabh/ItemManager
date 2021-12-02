@@ -5,7 +5,7 @@ import getWeb3 from "./getWeb3";
 import "./App.css";
 
 class App extends Component {
-  state = { storageValue: 0, web3: null, accounts: null, contract: null };
+  state = { storageValue: 0, web3: null, accounts: null, contract: null, owner: null, caller: null};
 
   componentDidMount = async () => {
     try {
@@ -25,7 +25,8 @@ class App extends Component {
 
       // Set web3, accounts, and contract to the state, and then proceed with an
       // example of interacting with the contract's methods.
-      this.setState({ web3, accounts, contract: instance }, this.runExample);
+      const caller = web3.currentProvider.selectedAddress;
+      this.setState({ web3, accounts, contract: instance, caller: caller }, this.runExample);
     } catch (error) {
       // Catch any errors for any of the above operations.
       alert(
@@ -44,8 +45,12 @@ class App extends Component {
     // Get the value from the contract to prove it worked.
     const response = await contract.methods.getData().call();
 
+    const owner = await contract.methods.getOwner().call();
+
     // Update state with the result.
     this.setState({ storageValue: response });
+
+    this.setState({owner: owner});
   };
 
   render() {
@@ -62,8 +67,16 @@ class App extends Component {
           a stored value of 5 (by default).
         </p>
         <p>
+          Owner of the contract is <strong> {this.state.owner} </strong>
+          </p>
+        <p>
           Try changing the value stored on <strong>line 42</strong> of App.js.
         </p>
+
+        <p>
+          Caller address:  <strong>{this.state.caller}</strong>
+        </p>
+      
         <div>The stored value is: {this.state.storageValue}</div>
       </div>
     );
